@@ -15,22 +15,31 @@
 package worker
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	std_errors "errors"
 	"github.com/juju/errors"
+	"io"
 	"os"
 	"path/filepath"
 )
 
+type MetaCache struct {
+	WorkerName string `json:"worker_name"`
+}
+
 // LocalCache for the worker node.
 type LocalCache struct {
-	path       string
-	WorkerName string
+	folderPath string
+	metaPath   string
+	meta       MetaCache
 }
 
 // LoadLocalCache loads cache from a local file.
 func LoadLocalCache(path string) (*LocalCache, error) {
-	state := &LocalCache{path: path}
+	state := &LocalCache{
+		folderPath: path,
+		metaPath:   filepath.Join(path, "meta.json"),
+	}
 	// check if file exists
 	if _, err := os.Stat(path); err != nil {
 		if std_errors.Is(err, os.ErrNotExist) {
@@ -39,13 +48,16 @@ func LoadLocalCache(path string) (*LocalCache, error) {
 		return state, errors.Trace(err)
 	}
 	// open file
-	f, err := os.Open(path)
+	f, err := os.Open(state.metaPath)
 	if err != nil {
 		return state, errors.Trace(err)
 	}
 	defer f.Close()
-	decoder := gob.NewDecoder(f)
-	if err = decoder.Decode(&state.WorkerName); err != nil {
+	metaData, err := io.ReadAll(f)
+	if err != nil {
+		return state, errors.Trace(err)
+	}
+	if err = json.Unmarshal(metaData, &state.meta); err != nil {
 		return state, errors.Trace(err)
 	}
 	return state, nil
@@ -53,21 +65,24 @@ func LoadLocalCache(path string) (*LocalCache, error) {
 
 // WriteLocalCache writes cache to a local file.
 func (c *LocalCache) WriteLocalCache() error {
-	// create parent folder if not exists
-	parent := filepath.Dir(c.path)
-	if _, err := os.Stat(parent); os.IsNotExist(err) {
-		err = os.MkdirAll(parent, os.ModePerm)
+	// create folder if not exists
+	if _, err := os.Stat(c.folderPath); os.IsNotExist(err) {
+		err = os.MkdirAll(c.folderPath, os.ModePerm)
 		if err != nil {
 			return errors.Trace(err)
 		}
 	}
 	// create file
-	f, err := os.Create(c.path)
+	f, err := os.Create(c.metaPath)
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer f.Close()
 	// write file
-	encoder := gob.NewEncoder(f)
-	return errors.Trace(encoder.Encode(c.WorkerName))
+	metaData, err := json.Marshal(c.meta)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	_, err = f.Write(metaData)
+	return errors.Trace(err)
 }

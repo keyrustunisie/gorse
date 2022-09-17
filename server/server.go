@@ -81,17 +81,17 @@ func (s *Server) Serve() {
 			log.Logger().Info("no cache file found, create a new one", zap.String("path", s.cacheFile))
 		} else {
 			log.Logger().Error("failed to connect local store", zap.Error(err),
-				zap.String("path", state.path))
+				zap.String("path", state.folderPath))
 		}
 	}
-	if state.ServerName == "" {
-		state.ServerName = base.GetRandomName(0)
+	if state.meta.ServerName == "" {
+		state.meta.ServerName = base.GetRandomName(0)
 		err = state.WriteLocalCache()
 		if err != nil {
 			log.Logger().Fatal("failed to write meta", zap.Error(err))
 		}
 	}
-	s.serverName = state.ServerName
+	s.serverName = state.meta.ServerName
 	log.Logger().Info("start server",
 		zap.String("server_name", s.serverName),
 		zap.String("server_host", s.HttpHost),

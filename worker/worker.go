@@ -284,20 +284,20 @@ func (w *Worker) Serve() {
 		state, err := LoadLocalCache(w.cacheFile)
 		if err != nil {
 			if errors.Is(err, errors.NotFound) {
-				log.Logger().Info("no cache file found, create a new one", zap.String("path", state.path))
+				log.Logger().Info("no cache file found, create a new one", zap.String("path", state.folderPath))
 			} else {
 				log.Logger().Error("failed to load persist state", zap.Error(err),
-					zap.String("path", state.path))
+					zap.String("path", state.folderPath))
 			}
 		}
-		if state.WorkerName == "" {
-			state.WorkerName = base.GetRandomName(0)
+		if state.meta.WorkerName == "" {
+			state.meta.WorkerName = base.GetRandomName(0)
 			err = state.WriteLocalCache()
 			if err != nil {
 				log.Logger().Fatal("failed to write meta", zap.Error(err))
 			}
 		}
-		w.workerName = state.WorkerName
+		w.workerName = state.meta.WorkerName
 		log.Logger().Info("start worker",
 			zap.Int("n_jobs", w.jobs),
 			zap.String("worker_name", w.workerName))

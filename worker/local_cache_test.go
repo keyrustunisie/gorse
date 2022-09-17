@@ -24,18 +24,19 @@ import (
 func TestLocalCache(t *testing.T) {
 	// delete test file if exists
 	path := filepath.Join(os.TempDir(), "TestLocalCache_Worker")
-	_ = os.Remove(path)
+	_ = os.RemoveAll(path)
 	// load non-existed file
 	cache, err := LoadLocalCache(path)
 	assert.Error(t, err)
-	assert.Equal(t, path, cache.path)
-	assert.Empty(t, cache.WorkerName)
+	assert.Equal(t, path, cache.folderPath)
+	assert.Equal(t, filepath.Join(path, "meta.json"), cache.metaPath)
+	assert.Empty(t, cache.meta.WorkerName)
 	// write and load
-	cache.WorkerName = "Worker"
+	cache.meta.WorkerName = "Worker"
 	assert.NoError(t, cache.WriteLocalCache())
 	read, err := LoadLocalCache(path)
 	assert.NoError(t, err)
-	assert.Equal(t, "Worker", read.WorkerName)
+	assert.Equal(t, "Worker", read.meta.WorkerName)
 	// delete test file
-	assert.NoError(t, os.Remove(path))
+	assert.NoError(t, os.RemoveAll(path))
 }
