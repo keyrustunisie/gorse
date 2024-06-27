@@ -8,7 +8,7 @@ jobs:
   assign_issues:
     name: assign issues
     if: ${{ !github.event.issue.pull_request && github.event.comment.body == '/assign' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: 'Assign issue'
         uses: pozil/auto-assign-issue@v1.4.0
