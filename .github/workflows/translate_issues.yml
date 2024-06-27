@@ -8,7 +8,7 @@ on:
 jobs:
   translate-isssues:
     name: translate issues
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Issues Translator
         uses: tomsun28/issues-translate-action@v2.5
