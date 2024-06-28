@@ -13,7 +13,7 @@ on:
 jobs:
   unit_test:
     name: unit tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     services:
       mysql:
@@ -131,7 +131,7 @@ jobs:
 
   integrate_test:
     name: integrate tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         database: [mysql, postgres, mongo, clickhouse]
@@ -180,7 +180,7 @@ jobs:
 
   compat_test:
     name: compatibility tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     services:
       mariadb:
@@ -215,7 +215,7 @@ jobs:
 
   golangci:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/setup-go@v2
         with:
