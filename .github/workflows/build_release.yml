@@ -52,7 +52,7 @@ jobs:
 
   build-docker-images:
     name: build docker images
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         image: [gorse-master, gorse-server, gorse-worker, gorse-in-one]
